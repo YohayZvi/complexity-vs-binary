@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Complexity vs. binary — poles on a distance scale</title>
+<title>Two axes of complexity — dimensionality and resolution</title>
 <style>
   :root{
     --bg:#f4f4f2; --panel:#ffffff; --ink:#1c1c1e; --muted:#6b6b70;
@@ -73,8 +73,8 @@
 <body>
 <div class="wrap">
   <header>
-    <h1>Complexity vs. binary — two poles on a distance scale</h1>
-    <p>Two poles are two <em>vectors</em>, one at each end of a distance scale. The gap between them <em>is</em> the measured distance. Choose how each scale is judged (<em>binary</em> vs. <em>continuous</em>), how many dimensions the vector has, and which <em>distance metric</em> to use — the reading updates for that configuration alone.</p>
+    <h1>Two axes of complexity: dimensionality and resolution</h1>
+    <p>Representational complexity is not the opposite of “binary” — it is composed of two separable axes: <em>dimensionality</em> (how many scales a judgment uses) and <em>resolution</em> (how finely each scale is graded, from binary to continuous). Binary and uni-dimensional is simply the minimal corner. Two poles are two <em>vectors</em> at the ends of a distance scale; the gap between them is the measured distance, and raising either axis pulls them together. Set the number of dimensions, the resolution of each scale, and the distance metric below.</p>
   </header>
 
   <div class="stage">
@@ -95,7 +95,7 @@
         </select>
       </div>
       <div class="ctl gran">
-        <label>Granularity of each scale</label>
+        <label>Resolution of each scale</label>
         <div class="seg" id="segGran" role="group" aria-label="Granularity">
           <button data-v="binary" class="active">Binary</button>
           <button data-v="cont">Continuous</button>
