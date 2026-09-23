@@ -109,7 +109,7 @@
       </div>
     </div>
 
-    <div class="scaleviz"><svg id="viz" viewBox="0 0 800 372" preserveAspectRatio="xMidYMid meet"></svg></div>
+    <div class="scaleviz"><svg id="viz" viewBox="0 0 800 280" preserveAspectRatio="xMidYMid meet"></svg></div>
 
     <div class="caption" id="caption"></div>
   </div>
@@ -190,33 +190,13 @@ const kSlider=document.getElementById('kSlider'), nLabel=document.getElementById
 function drawViz(frac,col){
   const VBW=800, S=200, topY=56, k=state.k, gran=state.gran, n=k*k;
   const cs=S/k;
-  const gapMin=64, gapMax=356;
+  const gapMin=118, gapMax=344;
   const gap=gapMin+frac*(gapMax-gapMin);
   const totalW=2*S+gap;
   const startX=(VBW-totalW)/2;
   const xA=startX, xB=startX+S+gap;
-  const yBase=topY+S+38;
+  const yMid=topY+S/2;
 
-  let s='';
-  // baseline scale reference (max extent at frac=1)
-  const tWmax=2*S+gapMax, sXmax=(VBW-tWmax)/2;
-  const fullAr=sXmax+S, fullBl=sXmax+S+gapMax;
-  s+=`<line x1="${fullAr}" y1="${yBase}" x2="${fullBl}" y2="${yBase}" stroke="#e6e5e1" stroke-width="2"/>`;
-  s+=`<text x="${fullAr}" y="${yBase+19}" text-anchor="start" font-size="10.5" fill="#a0a09a">← closer</text>`;
-  s+=`<text x="${fullBl}" y="${yBase+19}" text-anchor="end" font-size="10.5" fill="#a0a09a">farther →</text>`;
-  // current-distance bracket
-  s+=`<line x1="${xA+S}" y1="${yBase}" x2="${xB}" y2="${yBase}" stroke="${col}" stroke-width="3"/>`;
-  s+=`<line x1="${xA+S}" y1="${yBase-5}" x2="${xA+S}" y2="${yBase+5}" stroke="${col}" stroke-width="3"/>`;
-  s+=`<line x1="${xB}" y1="${yBase-5}" x2="${xB}" y2="${yBase+5}" stroke="${col}" stroke-width="3"/>`;
-  const pillW=96, pillX=VBW/2-pillW/2, pillY=yBase-15;
-  s+=`<rect x="${pillX}" y="${pillY}" width="${pillW}" height="27" rx="13.5" fill="#fff" stroke="${col}" stroke-width="1.5"/>`;
-  s+=`<text x="${VBW/2}" y="${pillY+18.5}" text-anchor="middle" font-size="14" font-weight="700" fill="${col}">${METRICS[state.metric].fmt(value(k,gran,state.metric))}</text>`;
-
-  // pole labels
-  s+=`<text x="${xA+S/2}" y="${topY-16}" text-anchor="middle" font-size="12.5" font-weight="650" fill="#6b6b70" letter-spacing=".5">POLE A</text>`;
-  s+=`<text x="${xB+S/2}" y="${topY-16}" text-anchor="middle" font-size="12.5" font-weight="650" fill="#6b6b70" letter-spacing=".5">POLE B</text>`;
-
-  // matrices
   const matrix=(ox,which)=>{
     let m='';
     for(let i=0;i<n;i++){
@@ -229,8 +209,21 @@ function drawViz(frac,col){
     m+=`<rect x="${ox}" y="${topY}" width="${S}" height="${S}" fill="none" stroke="#8a8a86" stroke-width="1.6"/>`;
     return m;
   };
+
+  let s='';
+  // pole labels
+  s+=`<text x="${xA+S/2}" y="${topY-16}" text-anchor="middle" font-size="12.5" font-weight="650" fill="#6b6b70" letter-spacing=".5">POLE A</text>`;
+  s+=`<text x="${xB+S/2}" y="${topY-16}" text-anchor="middle" font-size="12.5" font-weight="650" fill="#6b6b70" letter-spacing=".5">POLE B</text>`;
+  // matrices
   s+=matrix(xA,'A');
   s+=matrix(xB,'B');
+  // distance measure: connecting line + value, centered between the two squares
+  s+=`<line x1="${xA+S}" y1="${yMid}" x2="${xB}" y2="${yMid}" stroke="${col}" stroke-width="3"/>`;
+  s+=`<line x1="${xA+S}" y1="${yMid-6}" x2="${xA+S}" y2="${yMid+6}" stroke="${col}" stroke-width="3"/>`;
+  s+=`<line x1="${xB}" y1="${yMid-6}" x2="${xB}" y2="${yMid+6}" stroke="${col}" stroke-width="3"/>`;
+  const pillW=96, pillX=VBW/2-pillW/2, pillY=yMid-16;
+  s+=`<rect x="${pillX}" y="${pillY}" width="${pillW}" height="32" rx="16" fill="#fff" stroke="${col}" stroke-width="1.6"/>`;
+  s+=`<text x="${VBW/2}" y="${pillY+21}" text-anchor="middle" font-size="15" font-weight="700" fill="${col}">${METRICS[state.metric].fmt(value(k,gran,state.metric))}</text>`;
   viz.innerHTML=s;
 }
 
