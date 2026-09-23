@@ -7,7 +7,7 @@
 <style>
   :root{
     --bg:#f4f4f2; --panel:#ffffff; --ink:#1c1c1e; --muted:#6b6b70;
-    --line:#e2e2df; --cell-border:#c9c9c4; --radius:16px;
+    --line:#e2e2df; --cell-border:#cfcfca; --radius:16px;
     --shadow:0 1px 2px rgba(0,0,0,.05),0 12px 30px rgba(0,0,0,.06);
     --barcol:#d1372f;
     font-synthesis:none;
@@ -18,25 +18,24 @@
     font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
     line-height:1.5;-webkit-font-smoothing:antialiased;
     display:flex;justify-content:center;padding:32px 20px 56px;}
-  .wrap{width:100%;max-width:860px;}
-  header h1{font-size:23px;letter-spacing:-.02em;margin:0 0 4px;font-weight:650;}
-  header p{margin:0;color:var(--muted);font-size:14.5px;max-width:66ch;}
+  .wrap{width:100%;max-width:880px;}
+  header h1{font-size:23px;letter-spacing:-.02em;margin:0 0 6px;font-weight:650;}
+  header p{margin:0;color:var(--muted);font-size:14.5px;max-width:70ch;}
   header p em{color:var(--ink);font-style:normal;font-weight:600;}
 
   .stage{background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);
     box-shadow:var(--shadow);margin-top:18px;padding:22px 24px 24px;}
 
-  /* distance readout */
   .dhead{display:flex;align-items:flex-end;gap:16px;flex-wrap:wrap;}
   .dhead .big{font-size:46px;font-weight:700;line-height:.95;color:var(--barcol);
     font-variant-numeric:tabular-nums;letter-spacing:-.02em;}
   .dhead .dmeta{font-size:13px;color:var(--muted);padding-bottom:5px;}
   .dhead .dmeta .mn{color:var(--ink);font-weight:650;font-size:14px;}
+  .dhead .tag{margin-left:auto;padding-bottom:6px;font-size:12px;color:var(--muted);text-align:right;max-width:32ch;}
 
-  /* controls under the measure */
   .ctlbar{display:flex;flex-wrap:wrap;gap:16px;margin:16px 0 4px;padding:14px 0 2px;border-top:1px solid var(--line);}
   .ctl{display:flex;flex-direction:column;gap:7px;}
-  .ctl.metric{flex:1 1 210px;} .ctl.gran{flex:1 1 190px;} .ctl.dim{flex:2 1 300px;}
+  .ctl.metric{flex:1 1 210px;} .ctl.gran{flex:1 1 200px;} .ctl.dim{flex:2 1 300px;}
   .ctl label{font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);font-weight:600;display:flex;justify-content:space-between;align-items:baseline;}
   .ctl label .nv{font-size:14px;color:var(--barcol);font-weight:700;letter-spacing:0;text-transform:none;font-variant-numeric:tabular-nums;}
   select{font:inherit;font-size:14px;padding:9px 11px;border:1px solid var(--line);border-radius:10px;background:var(--panel);color:var(--ink);cursor:pointer;appearance:none;
@@ -45,6 +44,7 @@
   .seg{display:flex;background:#efeeeb;border-radius:10px;padding:3px;gap:3px;}
   .seg button{flex:1;border:0;background:transparent;color:var(--muted);font:inherit;font-size:13.5px;font-weight:550;padding:9px 6px;border-radius:8px;cursor:pointer;transition:all .18s;}
   .seg button.active{background:var(--panel);color:var(--ink);box-shadow:0 1px 2px rgba(0,0,0,.12);}
+  .seg button:focus-visible{outline:2px solid var(--barcol);outline-offset:2px;}
   input[type=range]{-webkit-appearance:none;appearance:none;width:100%;height:6px;border-radius:6px;
     background:linear-gradient(90deg,var(--barcol) 0 var(--fillpct,0%),#e6e5e1 var(--fillpct,0%) 100%);outline:none;margin:9px 0 2px;}
   input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;appearance:none;width:20px;height:20px;border-radius:50%;background:var(--panel);border:2px solid var(--barcol);box-shadow:0 1px 3px rgba(0,0,0,.25);cursor:pointer;}
@@ -74,13 +74,14 @@
 <div class="wrap">
   <header>
     <h1>Two axes of complexity: dimensionality and resolution</h1>
-    <p>Representational complexity is not the opposite of “binary” — it is composed of two separable axes: <em>dimensionality</em> (how many scales a judgment uses) and <em>resolution</em> (how finely each scale is graded, from binary to continuous). Binary and uni-dimensional is simply the minimal corner. Two poles are two <em>vectors</em> at the ends of a distance scale; the gap between them is the measured distance, and raising either axis pulls them together. Set the number of dimensions, the resolution of each scale, and the distance metric below.</p>
+    <p>Each social pole is a <em>square judgment</em> of the same situation. <em>Dimensionality</em> subdivides the square into independent cells — one cell is uni-dimensional, a grid is multi-dimensional. <em>Resolution</em> grades each cell from <em>binary</em> (black / white) to <em>continuous</em> (shades of gray). The two poles sit at the ends of a distance scale: the gap between them is their polarization, and raising either axis of complexity pulls them together.</p>
   </header>
 
   <div class="stage">
     <div class="dhead">
       <div class="big" id="distBig">100%</div>
       <div class="dmeta"><span class="mn" id="metricName">Percentage</span><br><span id="metricHint">mean |Δ| · 0–100%</span></div>
+      <div class="tag">distance between the two poles<br>= <span id="tagState">binary · 1 cell</span></div>
     </div>
 
     <div class="ctlbar">
@@ -95,73 +96,79 @@
         </select>
       </div>
       <div class="ctl gran">
-        <label>Resolution of each scale</label>
-        <div class="seg" id="segGran" role="group" aria-label="Granularity">
+        <label>Resolution of each cell</label>
+        <div class="seg" id="segGran" role="group" aria-label="Resolution">
           <button data-v="binary" class="active">Binary</button>
           <button data-v="cont">Continuous</button>
         </div>
       </div>
       <div class="ctl dim">
-        <label><span>Dimensionality</span><span class="nv" id="nLabel">n = 1</span></label>
-        <input type="range" id="nSlider" min="1" max="24" step="1" value="1">
-        <div class="ticks"><span>1 · uni-dimensional</span><span>24</span></div>
+        <label><span>Dimensionality</span><span class="nv" id="nLabel">n = 1 (1×1)</span></label>
+        <input type="range" id="kSlider" min="1" max="6" step="1" value="1">
+        <div class="ticks"><span>1 cell · uni-dimensional</span><span>36 (6×6)</span></div>
       </div>
     </div>
 
-    <div class="scaleviz"><svg id="viz" viewBox="0 0 700 360" preserveAspectRatio="xMidYMid meet"></svg></div>
+    <div class="scaleviz"><svg id="viz" viewBox="0 0 800 372" preserveAspectRatio="xMidYMid meet"></svg></div>
 
     <div class="caption" id="caption"></div>
   </div>
 
   <div class="plot">
-    <div class="lbl">Distance vs. number of dimensions — current configuration</div>
-    <svg id="spark" viewBox="0 0 560 150" preserveAspectRatio="xMidYMid meet"></svg>
+    <div class="lbl">Polarization vs. dimensionality — current configuration</div>
+    <svg id="spark" viewBox="0 0 560 158" preserveAspectRatio="xMidYMid meet"></svg>
   </div>
 
   <div class="lower">
     <button class="shuffle" id="shuffle">↻ Shuffle the poles</button>
-    <p>One strongly contested axis plus additional axes the poles increasingly share. With an averaged metric the distance can only hold or fall as dimensions are added; with a summed metric (Manhattan, Euclidean) it never falls — the metric choice decides the story.</p>
+    <p>A few strongly contested cells plus additional cells the poles increasingly share. With an averaged metric the distance can only hold or fall as the square is subdivided; a summed metric (Manhattan, Euclidean) never averages down.</p>
   </div>
 
   <footer>
-    <em>The idea.</em> Under an averaged metric, the maximum-distance corner is uni-dimensional and binary — one axis, us-or-them. Making the scale continuous softens that axis; adding dimensions averages the one clash against shared ground. Both moves reduce the distance — the loss / gain of representational complexity the proposal treats as the engine of herding and polarization. Switching the metric shows how much that conclusion depends on normalizing for dimensionality.
+    <em>The idea.</em> Polarization — the distance between two poles — is largest in the low-complexity corner: one cell, judged black-or-white. Subdividing the square (dimensionality) spreads the judgment across cells the sides often share; grading each cell (resolution) softens the clash within a cell. Either axis of representational complexity reduces the distance, and both together reduce it most — the mechanism the proposal advances for herding and depolarization. Switching the distance metric shows how much the conclusion depends on normalizing for dimensionality.
   </footer>
 </div>
 
 <script>
-const MAXN=24;
+const MAXK=6;                 // grid side; dimensions n = k*k (1,4,9,16,25,36)
+const NDIM=MAXK*MAXK;
 let data=seedData();
 
+// dims 0..2 contested (straddle 0.5, decreasing gap); rest shared (identical shade)
 function seedData(){
-  const A=new Array(MAXN),B=new Array(MAXN);
-  A[0]=0.85;B[0]=0.15;  A[1]=0.72;B[1]=0.28;
-  const s=[0.34,0.71,0.22,0.58,0.30,0.80,0.17,0.63,0.44,0.75,0.26,0.55,0.38,0.68,0.20,0.60,0.48,0.33,0.72,0.29,0.52,0.40];
-  for(let i=2;i<MAXN;i++){A[i]=B[i]=s[i-2];}
+  const A=new Array(NDIM),B=new Array(NDIM);
+  A[0]=0.85;B[0]=0.15;  A[1]=0.75;B[1]=0.25;  A[2]=0.66;B[2]=0.34;
+  const s=[0.34,0.71,0.22,0.58,0.30,0.80,0.17,0.63,0.44,0.75,0.26,0.55,0.38,0.68,
+           0.20,0.60,0.48,0.33,0.72,0.29,0.52,0.40,0.24,0.66,0.36,0.78,0.19,0.57,
+           0.31,0.70,0.46,0.62,0.28];
+  for(let i=3;i<NDIM;i++){A[i]=B[i]=s[i-3];}
   return {A,B};
 }
 function shuffleData(){
-  const A=new Array(MAXN),B=new Array(MAXN);
-  const g0=0.34+Math.random()*0.13; let g1=0.16+Math.random()*(g0-0.16);
-  A[0]=0.5+g0;B[0]=0.5-g0; A[1]=0.5+g1;B[1]=0.5-g1;
-  for(let i=2;i<MAXN;i++){const v=0.15+Math.random()*0.70;A[i]=v;B[i]=v;}
+  const A=new Array(NDIM),B=new Array(NDIM);
+  const h=[0.33+Math.random()*0.14];            // largest gap
+  h.push(0.20+Math.random()*(h[0]-0.23));
+  h.push(0.11+Math.random()*(h[1]-0.14));
+  for(let i=0;i<3;i++){A[i]=0.5+h[i];B[i]=0.5-h[i];}
+  for(let i=3;i<NDIM;i++){const v=0.15+Math.random()*0.70;A[i]=v;B[i]=v;}
   data={A,B};
 }
 
-const state={n:1,gran:'binary',metric:'pct'};
+const state={k:1,gran:'binary',metric:'pct'};
 const bin=v=>v>=0.5?1:0;
 const mean=a=>a.reduce((x,y)=>x+y,0)/a.length;
 const sum=a=>a.reduce((x,y)=>x+y,0);
 
 const METRICS={
-  pct:  {name:'Percentage', hint:'mean |Δ| · 0–100%',        norm:true,  calc:d=>mean(d),                         fmt:v=>Math.round(v*100)+'%'},
-  manh: {name:'Manhattan',  hint:'Σ |Δ| · sum, grows with n', norm:false, calc:d=>sum(d),                          fmt:v=>v.toFixed(2)},
-  eucl: {name:'Euclidean',  hint:'√Σ Δ² · L2, grows with n',  norm:false, calc:d=>Math.sqrt(sum(d.map(x=>x*x))),   fmt:v=>v.toFixed(2)},
-  rms:  {name:'RMS',        hint:'√(mean Δ²) · normalized L2', norm:true,  calc:d=>Math.sqrt(mean(d.map(x=>x*x))),  fmt:v=>v.toFixed(3)},
-  mse:  {name:'MSE',        hint:'mean Δ² · 0–1',             norm:true,  calc:d=>mean(d.map(x=>x*x)),             fmt:v=>v.toFixed(3)}
+  pct:  {name:'Percentage', hint:'mean |Δ| · 0–100%',        norm:true,  calc:d=>mean(d),                        fmt:v=>Math.round(v*100)+'%'},
+  manh: {name:'Manhattan',  hint:'Σ |Δ| · sum over cells',    norm:false, calc:d=>sum(d),                         fmt:v=>v.toFixed(2)},
+  eucl: {name:'Euclidean',  hint:'√Σ Δ² · L2 over cells',     norm:false, calc:d=>Math.sqrt(sum(d.map(x=>x*x))),  fmt:v=>v.toFixed(2)},
+  rms:  {name:'RMS',        hint:'√(mean Δ²) · normalized L2', norm:true,  calc:d=>Math.sqrt(mean(d.map(x=>x*x))), fmt:v=>v.toFixed(3)},
+  mse:  {name:'MSE',        hint:'mean Δ² · 0–1',             norm:true,  calc:d=>mean(d.map(x=>x*x)),            fmt:v=>v.toFixed(3)}
 };
 
-function diffs(n,gran){
-  const d=[];
+function diffs(k,gran){
+  const n=k*k, d=[];
   for(let i=0;i<n;i++){
     const a=gran==='binary'?bin(data.A[i]):data.A[i];
     const b=gran==='binary'?bin(data.B[i]):data.B[i];
@@ -169,107 +176,104 @@ function diffs(n,gran){
   }
   return d;
 }
-function value(n,gran,metric){ return METRICS[metric].calc(diffs(n,gran)); }
-function vmaxOf(gran,metric){ let m=0; for(let k=1;k<=MAXN;k++){const v=value(k,gran,metric); if(v>m)m=v;} return m||1e-9; }
+function value(k,gran,metric){ return METRICS[metric].calc(diffs(k,gran)); }
+function vmaxOf(gran,metric){ let m=0; for(let kk=1;kk<=MAXK;kk++){const v=value(kk,gran,metric); if(v>m)m=v;} return m||1e-9; }
 
 function ramp(t){t=Math.max(0,Math.min(1,t));const hot=[209,55,47],cool=[58,125,110];const c=hot.map((h,i)=>Math.round(cool[i]+(h-cool[i])*t));return `rgb(${c[0]},${c[1]},${c[2]})`;}
 const shade=v=>{const x=Math.round(v*255);return `rgb(${x},${x},${x})`;};
-function diffColor(d){const base=[236,234,230],hot=[209,55,47];const c=base.map((b,i)=>Math.round(b+(hot[i]-b)*Math.min(1,d)));return `rgb(${c[0]},${c[1]},${c[2]})`;}
-const esc=s=>String(s);
 
 // refs
 const viz=document.getElementById('viz'), spark=document.getElementById('spark');
 const distBig=document.getElementById('distBig'), metricName=document.getElementById('metricName'), metricHint=document.getElementById('metricHint');
-const nSlider=document.getElementById('nSlider'), nLabel=document.getElementById('nLabel'), caption=document.getElementById('caption');
+const kSlider=document.getElementById('kSlider'), nLabel=document.getElementById('nLabel'), caption=document.getElementById('caption'), tagState=document.getElementById('tagState');
 
 function drawViz(frac,col){
-  const VBW=700, topY=52, vecH=250, cellW=46;
-  const n=state.n, gran=state.gran;
-  const cellH=vecH/n;
-  const gapMin=110, gapMax=440;
+  const VBW=800, S=200, topY=56, k=state.k, gran=state.gran, n=k*k;
+  const cs=S/k;
+  const gapMin=64, gapMax=356;
   const gap=gapMin+frac*(gapMax-gapMin);
-  const totalW=2*cellW+gap;
+  const totalW=2*S+gap;
   const startX=(VBW-totalW)/2;
-  const xAl=startX, xAr=startX+cellW, xBl=startX+cellW+gap, xBr=xBl+cellW;
-  const yc=i=>topY+i*cellH+cellH/2;
-
-  // max-extent reference (frac=1) for the baseline scale
-  const totalWmax=2*cellW+gapMax, sXmax=(VBW-totalWmax)/2;
-  const fullAr=sXmax+cellW, fullBl=sXmax+cellW+gapMax;
-  const yBase=topY+vecH+34;
+  const xA=startX, xB=startX+S+gap;
+  const yBase=topY+S+38;
 
   let s='';
-  // baseline scale (0 = touching … max = full extent)
-  s+=`<line x1="${fullAr}" y1="${yBase}" x2="${fullBl}" y2="${yBase}" stroke="#e2e2df" stroke-width="2"/>`;
-  s+=`<text x="${fullAr}" y="${yBase+18}" text-anchor="start" font-size="10" fill="#9a9a9a">← closer</text>`;
-  s+=`<text x="${fullBl}" y="${yBase+18}" text-anchor="end" font-size="10" fill="#9a9a9a">farther →</text>`;
-  // current distance bracket
-  s+=`<line x1="${xAr}" y1="${yBase}" x2="${xBl}" y2="${yBase}" stroke="${col}" stroke-width="3"/>`;
-  s+=`<line x1="${xAr}" y1="${yBase-5}" x2="${xAr}" y2="${yBase+5}" stroke="${col}" stroke-width="3"/>`;
-  s+=`<line x1="${xBl}" y1="${yBase-5}" x2="${xBl}" y2="${yBase+5}" stroke="${col}" stroke-width="3"/>`;
-  const pillW=90, pillX=VBW/2-pillW/2, pillY=yBase-15;
-  s+=`<rect x="${pillX}" y="${pillY}" width="${pillW}" height="26" rx="13" fill="#fff" stroke="${col}" stroke-width="1.5"/>`;
-  s+=`<text x="${VBW/2}" y="${pillY+17.5}" text-anchor="middle" font-size="13.5" font-weight="700" fill="${col}">${METRICS[state.metric].fmt(value(n,gran,state.metric))}</text>`;
+  // baseline scale reference (max extent at frac=1)
+  const tWmax=2*S+gapMax, sXmax=(VBW-tWmax)/2;
+  const fullAr=sXmax+S, fullBl=sXmax+S+gapMax;
+  s+=`<line x1="${fullAr}" y1="${yBase}" x2="${fullBl}" y2="${yBase}" stroke="#e6e5e1" stroke-width="2"/>`;
+  s+=`<text x="${fullAr}" y="${yBase+19}" text-anchor="start" font-size="10.5" fill="#a0a09a">← closer</text>`;
+  s+=`<text x="${fullBl}" y="${yBase+19}" text-anchor="end" font-size="10.5" fill="#a0a09a">farther →</text>`;
+  // current-distance bracket
+  s+=`<line x1="${xA+S}" y1="${yBase}" x2="${xB}" y2="${yBase}" stroke="${col}" stroke-width="3"/>`;
+  s+=`<line x1="${xA+S}" y1="${yBase-5}" x2="${xA+S}" y2="${yBase+5}" stroke="${col}" stroke-width="3"/>`;
+  s+=`<line x1="${xB}" y1="${yBase-5}" x2="${xB}" y2="${yBase+5}" stroke="${col}" stroke-width="3"/>`;
+  const pillW=96, pillX=VBW/2-pillW/2, pillY=yBase-15;
+  s+=`<rect x="${pillX}" y="${pillY}" width="${pillW}" height="27" rx="13.5" fill="#fff" stroke="${col}" stroke-width="1.5"/>`;
+  s+=`<text x="${VBW/2}" y="${pillY+18.5}" text-anchor="middle" font-size="14" font-weight="700" fill="${col}">${METRICS[state.metric].fmt(value(k,gran,state.metric))}</text>`;
 
-  // per-dimension connectors (contribution to distance)
-  for(let i=0;i<n;i++){
-    const a=gran==='binary'?bin(data.A[i]):data.A[i];
-    const b=gran==='binary'?bin(data.B[i]):data.B[i];
-    const dd=Math.abs(a-b);
-    const w=Math.max(1.2,Math.min(cellH*0.55,7));
-    s+=`<line x1="${xAr}" y1="${yc(i)}" x2="${xBl}" y2="${yc(i)}" stroke="${diffColor(dd)}" stroke-width="${w}"/>`;
-  }
   // pole labels
-  s+=`<text x="${xAl+cellW/2}" y="${topY-16}" text-anchor="middle" font-size="12" font-weight="650" fill="#6b6b70" letter-spacing=".5">POLE A</text>`;
-  s+=`<text x="${xBl+cellW/2}" y="${topY-16}" text-anchor="middle" font-size="12" font-weight="650" fill="#6b6b70" letter-spacing=".5">POLE B</text>`;
-  // vector cells
-  for(let i=0;i<n;i++){
-    const a=gran==='binary'?bin(data.A[i]):data.A[i];
-    const b=gran==='binary'?bin(data.B[i]):data.B[i];
-    const h=Math.max(1,cellH-1.5);
-    s+=`<rect x="${xAl}" y="${topY+i*cellH}" width="${cellW}" height="${h}" rx="3" fill="${shade(a)}" stroke="#c9c9c4" stroke-width="1"/>`;
-    s+=`<rect x="${xBl}" y="${topY+i*cellH}" width="${cellW}" height="${h}" rx="3" fill="${shade(b)}" stroke="#c9c9c4" stroke-width="1"/>`;
-  }
-  // dimension caption
-  s+=`<text x="${VBW/2}" y="${topY+vecH+2}" text-anchor="middle" font-size="9.5" fill="#b4b4b0">each row = one dimension (1…${n}, top→bottom)</text>`;
+  s+=`<text x="${xA+S/2}" y="${topY-16}" text-anchor="middle" font-size="12.5" font-weight="650" fill="#6b6b70" letter-spacing=".5">POLE A</text>`;
+  s+=`<text x="${xB+S/2}" y="${topY-16}" text-anchor="middle" font-size="12.5" font-weight="650" fill="#6b6b70" letter-spacing=".5">POLE B</text>`;
+
+  // matrices
+  const matrix=(ox,which)=>{
+    let m='';
+    for(let i=0;i<n;i++){
+      const r=Math.floor(i/k), c=i%k;
+      const raw = which==='A'?data.A[i]:data.B[i];
+      const v = gran==='binary'?bin(raw):raw;
+      const x=ox+c*cs, y=topY+r*cs;
+      m+=`<rect x="${x.toFixed(2)}" y="${y.toFixed(2)}" width="${cs.toFixed(2)}" height="${cs.toFixed(2)}" fill="${shade(v)}" stroke="#cfcfca" stroke-width="0.8"/>`;
+    }
+    m+=`<rect x="${ox}" y="${topY}" width="${S}" height="${S}" fill="none" stroke="#8a8a86" stroke-width="1.6"/>`;
+    return m;
+  };
+  s+=matrix(xA,'A');
+  s+=matrix(xB,'B');
   viz.innerHTML=s;
 }
 
 function drawSpark(col){
-  const W=560,H=150,pl=38,pr=14,pt=12,pb=26;
-  const gran=state.gran, metric=state.metric;
-  const vmax=vmaxOf(gran,metric);
-  const x=i=>pl+(i-1)/(MAXN-1)*(W-pl-pr);
+  const W=560,H=158,pl=40,pr=14,pt=12,pb=30;
+  const gran=state.gran, metric=state.metric, vmax=vmaxOf(gran,metric);
+  const x=kk=>pl+(kk-1)/(MAXK-1)*(W-pl-pr);
   const y=v=>H-pb-(v/vmax)*(H-pt-pb);
   let path='';
-  for(let i=1;i<=MAXN;i++){path+=(i===1?'M':'L')+x(i).toFixed(1)+' '+y(value(i,gran,metric)).toFixed(1)+' ';}
+  for(let kk=1;kk<=MAXK;kk++){path+=(kk===1?'M':'L')+x(kk).toFixed(1)+' '+y(value(kk,gran,metric)).toFixed(1)+' ';}
   const grid=[0,0.5,1].map(f=>{const vv=vmax*f;return `<line x1="${pl}" y1="${y(vv)}" x2="${W-pr}" y2="${y(vv)}" stroke="#eceae6"/><text x="${pl-6}" y="${y(vv)+3.5}" text-anchor="end" font-size="9" fill="#9a9a9a">${METRICS[metric].fmt(vv)}</text>`;}).join('');
-  const cx=x(state.n), cy=y(value(state.n,gran,metric));
+  let dots='',xticks='';
+  for(let kk=1;kk<=MAXK;kk++){
+    const cxx=x(kk), cyy=y(value(kk,gran,metric)), cur=kk===state.k;
+    dots+=`<circle cx="${cxx}" cy="${cyy}" r="${cur?5:3}" fill="${cur?col:'#c4c4c0'}" stroke="#fff" stroke-width="${cur?2:1.5}"/>`;
+    xticks+=`<text x="${cxx}" y="${H-14}" text-anchor="middle" font-size="9" fill="${cur?'#1c1c1e':'#9a9a9a'}" font-weight="${cur?700:400}">${kk*kk}</text>`;
+  }
+  const cx=x(state.k);
   spark.innerHTML=`${grid}
     <path d="${path.trim()}" fill="none" stroke="${col}" stroke-width="2.6" stroke-linejoin="round"/>
-    <line x1="${cx}" y1="${pt}" x2="${cx}" y2="${H-pb}" stroke="${col}" stroke-width="1" opacity=".35"/>
-    <circle cx="${cx}" cy="${cy}" r="5" fill="${col}" stroke="#fff" stroke-width="2"/>
-    <text x="${(W+pl-pr)/2}" y="${H-5}" text-anchor="middle" font-size="9.5" fill="#9a9a9a">number of dimensions (n = 1 … ${MAXN})</text>`;
+    <line x1="${cx}" y1="${pt}" x2="${cx}" y2="${H-pb}" stroke="${col}" stroke-width="1" opacity=".3"/>
+    ${dots}${xticks}
+    <text x="${(W+pl-pr)/2}" y="${H-2}" text-anchor="middle" font-size="9.5" fill="#9a9a9a">number of cells  n  (1 · 4 · 9 · 16 · 25 · 36)</text>`;
 }
 
 function captionText(){
-  const n=state.n, g=state.gran, m=state.metric, norm=METRICS[m].norm;
+  const k=state.k, n=k*k, g=state.gran, m=state.metric, norm=METRICS[m].norm;
   let core;
   if(n===1) core = g==='binary'
-    ? "<b>n = 1, binary.</b> One all-or-nothing axis — pure black vs. pure white."
-    : "<b>n = 1, continuous.</b> One graded axis; the poles come off the extremes even before dimensions are added.";
+    ? "<b>One cell, binary.</b> A single all-or-nothing judgment — pure black vs. pure white. The poles are as far apart as they can be."
+    : "<b>One cell, continuous.</b> A single graded judgment; the poles already come off the extremes before the square is subdivided.";
   else core = g==='binary'
-    ? "<b>Binary, n = "+n+".</b> Shared axes (matching cells) dilute the contested ones."
-    : "<b>Continuous, n = "+n+".</b> Graded scales and shared axes average the one strong clash against agreement.";
+    ? "<b>"+k+"×"+k+" grid, binary.</b> The square splits into "+n+" cells; the sides share most of them, and shared cells dilute the few they clash on."
+    : "<b>"+k+"×"+k+" grid, continuous.</b> "+n+" graded cells: the strong clashes are averaged against agreement in shades of gray.";
   const tail = norm
-    ? " Under this averaged metric the distance is maximal at n = 1 and falls as complexity is added."
-    : " <span class='warn'>This metric sums over dimensions, so it never averages down — shared axes add zero and the total climbs to its peak and stays there instead of falling. Switch to Percentage, RMS, or MSE to see the complexity-reduces-distance effect.</span>";
+    ? " Under this averaged metric the distance is maximal at n = 1 and falls as either axis of complexity grows."
+    : " <span class='warn'>This metric sums over cells, so it never averages down — shared cells add zero and the total holds at its peak instead of falling. Switch to Percentage, RMS, or MSE for the complexity-reduces-distance effect.</span>";
   return core+tail;
 }
 
 function render(){
-  const gran=state.gran, metric=state.metric, n=state.n;
-  const v=value(n,gran,metric);
+  const gran=state.gran, metric=state.metric, k=state.k, n=k*k;
+  const v=value(k,gran,metric);
   const vmax=vmaxOf(gran,metric);
   const frac=Math.max(0,Math.min(1,v/vmax));
   const col=ramp(frac);
@@ -278,8 +282,9 @@ function render(){
   distBig.textContent=METRICS[metric].fmt(v);
   metricName.textContent=METRICS[metric].name;
   metricHint.textContent=METRICS[metric].hint;
-  nLabel.textContent='n = '+n;
-  nSlider.style.setProperty('--fillpct',((n-1)/(MAXN-1)*100)+'%');
+  nLabel.textContent='n = '+n+' ('+k+'×'+k+')';
+  tagState.textContent=(gran==='binary'?'binary':'continuous')+' · '+n+' cell'+(n>1?'s':'');
+  kSlider.style.setProperty('--fillpct',((k-1)/(MAXK-1)*100)+'%');
 
   drawViz(frac,col);
   drawSpark(col);
@@ -287,7 +292,7 @@ function render(){
 }
 
 // events
-nSlider.addEventListener('input',e=>{state.n=+e.target.value;render();});
+kSlider.addEventListener('input',e=>{state.k=+e.target.value;render();});
 document.getElementById('metricSel').addEventListener('change',e=>{state.metric=e.target.value;render();});
 document.getElementById('segGran').querySelectorAll('button').forEach(btn=>{
   btn.addEventListener('click',()=>{document.querySelectorAll('#segGran button').forEach(b=>b.classList.remove('active'));btn.classList.add('active');state.gran=btn.dataset.v;render();});
